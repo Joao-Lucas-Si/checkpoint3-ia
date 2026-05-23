@@ -35,7 +35,7 @@ class AssistantChain:
                     sistema = "você receberá uma reclamação de um usuário e deve extrair o problema central e fazer uma breve analise, além de captar opcionalmente o sentimento presente"
                     schema = ProcessamentoReclamacaoSchema.model_json_schema()
                 case "sugestao":
-                    sistema = ""
+                    sistema = "você receberá uma sugestão de um usuário e deve extrair o aspecto a ser modificado e a solução que ele sugere, além de captar opcionalmente o sentimento presente e fazer uma breve analise"
                     schema = ProcessamentoSugestaoSchema.model_json_schema()
             
             client = LLM_Client(sistema, format=schema)

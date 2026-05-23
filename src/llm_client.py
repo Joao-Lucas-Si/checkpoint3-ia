@@ -13,7 +13,7 @@ class LLM_Client:
     stream: bool
     formato: Optional[str|dict]
 
-    def __init__(self, sistema: Optional[str] = None , max_tokens: int = 300, temperatura: float = 0.5, think: bool = False, stream: bool = False, format:Optional[str|dict] = None) -> None:
+    def __init__(self, sistema: Optional[str] = None , max_tokens: int = 250, temperatura: float = 0.5, think: bool = False, stream: bool = False, format:Optional[str|dict] = None) -> None:
         self.sistema = sistema
         self.max_tokens = max_tokens
         self.stream = stream

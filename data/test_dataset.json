@@ -35,6 +35,27 @@
             "palavras_chaves": [
                 "desvio padrão", "média"
             ]
+        },
+        {
+            "input": "Eu tô surtando porque não consigo entender diferença entre átomo, molécula e elemento químico. Na minha cabeça parece tudo a mesma coisa e a prova é amanhã cedo",
+            "tipo": "duvida",
+            "tema": "quimica",
+            "urgencia": "alta",
+            "palavras_chaves": ["átomo", "moléculo", "elemento químico"]
+        },
+        {
+            "input": "Acho que o sistema poderia identificar quando o aluno está muito perdido ou ansioso antes de responder direto. Às vezes a dúvida vem porque a pessoa não entende um conceito básico anterior. Talvez fosse legal dividir a resposta em níveis de dificuldade e perguntar antes qual nível o aluno quer, tipo básico, intermediário ou revisão rápida",
+            "tema": "sistema",
+            "tipo": "sugestao",
+            "palavras_chaves": [],
+            "urgencia": "baixa"
+        },
+        {
+            "input": "muito obrigado pela sua ajuda",
+            "tema": "sistema",
+            "palavras_chaves":[["agradeço", "obrigado", "agredecido"]],
+            "tipo": "elogio",
+            "urgencia": "baixa"
         }
     ]
 }

@@ -23,5 +23,6 @@ def criar_menu(titulo: str, pegar_opcoes: list[dict]|Callable[[], list[dict]]):
                 continue
 
             opcoes[escolha]["codigo"]()
-        except:
+        except Exception as e:
+            print(e)
             print("valor invalido")

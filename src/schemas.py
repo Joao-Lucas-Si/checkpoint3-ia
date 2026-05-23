@@ -65,8 +65,11 @@ class TestCasoSchema(BaseModel):
 class TestDatasetSchema(BaseModel):
     casos: list[TestCasoSchema]
 
+class AtaqueCasoSchema(BaseModel):
+    input: str
+
 class AttackDatasetSchema(BaseModel):
-    pass
+    casos: list[AtaqueCasoSchema]
 
 
 class ConfigSchema(BaseModel):

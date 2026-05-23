@@ -1,7 +1,7 @@
 from src.llm_client import LLM_Client
 from src.utils import ler_arquivo, esperar, escrever_arquivo
-from src.schemas import TestDatasetSchema, ConfigSchema, RespostaSchema, ProcessamentoSchema, RegistroSchema, ClassificacaoSchema, TestCasoSchema
-from src.evaluator import Avaliador, criar_graficos
+from src.schemas import TestDatasetSchema, ConfigSchema, RespostaSchema, ProcessamentoSchema, RegistroSchema,  ClassificacaoSchema, TestCasoSchema, AttackDatasetSchema
+from src.evaluator import Avaliador, criar_testes_graficos, criar_ataques_graficos
 from src.guardrails import Input_Guardrail, validar_output
 from src.ui import criar_menu
 from typing import Callable, Optional
@@ -30,64 +30,61 @@ def conversacao():
         print()
     esperar()
 
-def avaliacao():
-    registros: list[RegistroSchema] = []
-    testes = ler_arquivo("data/test_dataset.json", TestDatasetSchema)
+def analisar(erros: set[str], registros: list[RegistroSchema], consistencias: list[list[ClassificacaoSchema]], input: str, tipo: str, palavras_chaves: list[str|list[str]], esperado: dict):
+    chain = AssistantChain(input)
+    avaliador = Avaliador()
+    registro = RegistroSchema(erros=erros, tipo=tipo, duracao=0 ,resposta="", esperado=esperado, palavras_esperadas=palavras_chaves)
+    registros.append(registro)
+    input_guardrail = Input_Guardrail(input)
+    erros.update(input_guardrail.validar_input())
+    if len(erros) > 0:
+        registro.erros =erros
+        return
+    classificacao = chain.classificar()
+    print("classificacao", classificacao)
+    registro.classificacao = classificacao
+    processamento: Optional[ProcessamentoSchema] = None
+    
+    if isinstance(classificacao, ClassificacaoSchema):
+        consistencias[len(consistencias) - 1].append(classificacao)
+        resultado = chain.processar(classificacao)
+        
+        if isinstance(resultado, ProcessamentoSchema):
+            processamento = resultado
+        else:
+            erros.update(resultado)
+        print("processamento", processamento)
+    registro.processamento = processamento
+    if len(erros) == 0 and classificacao and processamento:
+        resposta = chain.responder(classificacao, processamento)
+        if isinstance(resposta, RespostaSchema):
+            registro.resposta = resposta.response
+            output = validar_output(registro.resposta, palavras_chaves)
+            
+            if output[0]:
+                print(resposta.response)
+            else:
+                erros.update(output[1])
+    
+   
+def analisar_casos[T](casos: list[T], tipo: str, getInput: Callable[[T], str], getEsperado: Callable[[T], dict], getPalavrasChaves: Callable[[T], list[str|list[str]]], criar_graficos: Callable[[list[dict], list[list[ClassificacaoSchema]]], None]):
     consistencias: list[list[ClassificacaoSchema]] = []
-    for teste in testes.casos:
+    registros: list[RegistroSchema] = []
+    for teste in casos:
         consistencias.append([])
-        print(teste.input)
+        input = getInput(teste)
+        esperado = getEsperado(teste)
+        palavras_chaves = getPalavrasChaves(teste)
+        print(input)
         
-        
+        chain = AssistantChain(input)
         erros: set[str] = set()
         try:
-            def executar():
-                chain = AssistantChain(teste.input)
-                avaliador = Avaliador()
-                registro = RegistroSchema(erros=erros, tipo = "teste" if isinstance(teste, TestCasoSchema) else "ataque", duracao=0 ,resposta="", esperado={
-                        "urgencia": teste.urgencia,
-                        "tipo": teste.tipo,
-                        "tema": teste.tema
-                    }, palavras_esperadas=teste.palavras_chaves)
-                registros.append(registro)
-                input_guardrail = Input_Guardrail(teste.input)
-                erros.update(input_guardrail.validar_input())
-                if len(erros) > 0:
-                    registro.erros =erros
-                    return
-                classificacao = chain.classificar()
-                print("classificacao", classificacao)
-                registro.classificacao = classificacao
-                processamento: Optional[ProcessamentoSchema] = None
-                
-                if isinstance(classificacao, ClassificacaoSchema):
-                    consistencias[len(consistencias) - 1].append(classificacao)
-                    resultado = chain.processar(classificacao)
-                    
-                    if isinstance(resultado, ProcessamentoSchema):
-                        processamento = resultado
-                    else:
-                        erros.update(resultado)
-                    print("processamento", processamento)
-                registro.processamento = processamento
-                if len(erros) == 0 and classificacao and processamento:
-                    resposta = chain.responder(classificacao, processamento)
-                    if isinstance(resposta, RespostaSchema):
-                        registro.resposta = resposta.response
-                        output = validar_output(registro.resposta, teste.palavras_chaves)
-                        
-                        if output[0]:
-                            print(resposta.response)
-                        else:
-                            erros.update(output[1])
-               
-                for i in range(2):
-                    classificacao_teste = chain.classificar()
-                    if isinstance(classificacao_teste, ClassificacaoSchema):
-                        consistencias[len(consistencias) - 1].append(classificacao_teste)
-                
-            executar()
-            
+            analisar( erros, registros, consistencias,  input, tipo, palavras_chaves,  esperado)
+            for i in range(2):
+                classificacao_teste = chain.classificar()
+                if isinstance(classificacao_teste, ClassificacaoSchema):
+                    consistencias[len(consistencias) - 1].append(classificacao_teste)
         except Exception as e:
             print(e)
         if len(erros) > 0:
@@ -97,14 +94,22 @@ def avaliacao():
                 "tamanho": "prompt excedendo o limite máximo",
                 "proibido": "caracteres",
                 "ignore instructions": "tentativa de comprometer o comportamento do sistema",
-                "fora do dominio": "resposta do contexto esperado"
+                "fora do dominio": "resposta fora do contexto esperado"
             }        
             for erro in erros:
-                print(mensagens[erro])
-    try:
-        criar_graficos([registro.model_dump() for registro in registros], consistencias)
-    except Exception as e:
-        print(e)
+                    print(mensagens[erro])       
+    criar_graficos([registro.model_dump() for registro in registros], consistencias)
+def avaliacao():
+    testes = ler_arquivo("data/test_dataset.json", TestDatasetSchema)
+    ataques = ler_arquivo("data/attack_dataset.json", AttackDatasetSchema)
+    analisar_casos(testes.casos, "teste", lambda x : x.input, lambda teste : {
+                "urgencia": teste.urgencia,
+                "tipo": teste.tipo,
+                "tema": teste.tema
+            }, lambda teste : teste.palavras_chaves, criar_testes_graficos)
+    analisar_casos(ataques.casos, "teste", lambda x : x.input, lambda teste : {
+                
+            }, lambda teste : [], criar_ataques_graficos)
 
 def mudarPensamento():
     config.think = not config.think

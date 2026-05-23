@@ -74,28 +74,43 @@ class Avaliador():
             consistencia += comparar(registro[i], registro[i+1])
         return consistencia / 3
 
-def criar_graficos(registros: list[dict], consistencia_lista: list[list[ClassificacaoSchema]]):
-    avaliador = Avaliador()
+avaliador = Avaliador()
 
+def criar_testes_graficos(registros: list[dict], consistencia_lista: list[list[ClassificacaoSchema]]):
+    
     print([avaliador.acuracia(registro["classificacao"], registro["esperado"]) for registro in registros if "classificacao" in registro and registro["classificacao"] is not None])
     acuracia = sum([avaliador.acuracia(registro["classificacao"], registro["esperado"]) for registro in registros if "classificacao" in registro  and registro["classificacao"] is not None])
 
     json = avaliador.json(registros)
-
-    bloqueios = avaliador.bloqueios(registros)
     
     falsos_positivos = avaliador.falso_positivo(registros)
     
     consistencia = sum([avaliador.calc_consistencia([classificacao.model_dump() for classificacao in classificacoes]) for classificacoes in consistencia_lista]) / len(consistencia_lista)
 
-    nomes = ['Acuracia', 'json', 'bloqueios', 'falsos positivos', "Consistencia"]
-    metricas = [acuracia, json, bloqueios, falsos_positivos, consistencia]
+    nomes = ['Acuracia', 'json', 'falsos positivos', "Consistencia"]
+    metricas = [acuracia, json, falsos_positivos, consistencia]
     print(metricas)
     plt.ylim(0, len(registros))
     plt.bar(nomes, metricas)
     plt.title('analise')
     plt.ylabel('registros')
     plt.xlabel('métricas')
-    plt.savefig(f"output/graficos/metricas.png", pad_inches=1, orientation="portrait")
+    plt.savefig(f"output/graficos/testes.png", pad_inches=1, orientation="portrait")
     plt.close()
+
+def criar_ataques_graficos(registros: list[dict], consistencia: list[list[ClassificacaoSchema]]):
+    bloqueios = avaliador.bloqueios(registros)
+    respondidos = len([registro for registro in registros if registro["resposta"] and registro["resposta"]])
+
+    nomes = ['respondidos', 'bloqueados']
+    metricas = [respondidos, bloqueios]
+    print(metricas)
+    plt.ylim(0, len(registros))
+    plt.bar(nomes, metricas)
+    plt.title('analise')
+    plt.ylabel('registros')
+    plt.xlabel('métricas')
+    plt.savefig(f"output/graficos/ataques.png", pad_inches=1, orientation="portrait")
+    plt.close()
+
 
