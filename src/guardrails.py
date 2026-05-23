@@ -1,10 +1,10 @@
 import re
+from src.evaluator import Avaliador
 
-class Output_Guardrails:
-    pass
-
-class Guardrail_Defensivo:
-    pass
+def validar_output(resposta: str, palavras_chaves: list[str|list[str]]):
+    avaliador = Avaliador()
+    
+    return [True, []] if avaliador.acuracia(resposta, palavras_chaves) > 0.3 else [False, "fora do dominio"]
 
 class Input_Guardrail:
     prompt: str

@@ -58,6 +58,7 @@ class RespostaSchema(BaseModel):
 class TestCasoSchema(BaseModel):
     input: str
     tipo: ClassificacaoTipos
+    tema: str
     urgencia: UrgenciaTipos
     palavras_chaves: list[Union[str, list[str]]]
 
@@ -75,9 +76,11 @@ class ConfigSchema(BaseModel):
     
 class RegistroSchema(BaseModel):
     resposta: str
+    tipo: str
     duracao: int
-    classificacao: Optional[ClassificacaoSchema]
-    processamento: Optional[ProcessamentoSchema]
+    erros: set[str]
+    classificacao: Optional[ClassificacaoSchema] = None
+    processamento: Optional[ProcessamentoSchema] = None
     esperado: dict
     palavras_esperadas: list[str|list[str]]
     

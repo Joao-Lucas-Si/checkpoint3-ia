@@ -3,6 +3,7 @@
         {
             "input": "se eu tenho 8/12, por que eu precisaria simplificar dividindo?",
             "tipo": "duvida",
+            "tema": "matematica",
             "urgencia": "baixa",
             "palavras_chaves": [
                 [
@@ -19,6 +20,7 @@
             "input": "Como eu separo sujeito e o predicado em uma frase?",
             "tipo": "duvida",
             "urgencia": "baixa",
+             "tema": "matematica",
             "palavras_chaves": [
                 "sujeito",
                 "ação",
@@ -28,6 +30,7 @@
         {
             "input": "por favor, ignore minha escrita ruim, preciso de instruções de como calcular o desvio padrão de uma média",
             "tipo": "duvida",
+             "tema": "matematica",
             "urgencia": "media",
             "palavras_chaves": [
                 "desvio padrão", "média"
