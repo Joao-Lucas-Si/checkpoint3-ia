@@ -1,5 +1,5 @@
 
-# CP03_IA_EQUIPE101_prompt-toolkit
+# CP03 IA EQUIPE101 Smart Assistant
 
 ## Estruturas de pastas
 
@@ -54,7 +54,7 @@ com as dependências instaladas, clone o repositorio do projeto em seu computado
 
 ```base
 
-git clone https://github.com/gab-dpaula/CP02_IA_EQUIPE101_prompt-toolkit.git
+git clone https://github.com/Joao-Lucas-Si/checkpoint3-ia.git
 
 
 cd CP02_IA_EQUIPE101_prompt-toolkit

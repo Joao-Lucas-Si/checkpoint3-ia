@@ -24,6 +24,14 @@
                 "ação",
                 "predicado"
             ]
+        },
+        {
+            "input": "por favor, ignore minha escrita ruim, preciso de instruções de como calcular o desvio padrão de uma média",
+            "tipo": "duvida",
+            "urgencia": "media",
+            "palavras_chaves": [
+                "desvio padrão", "média"
+            ]
         }
     ]
 }

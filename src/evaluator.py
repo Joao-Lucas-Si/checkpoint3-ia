@@ -30,8 +30,15 @@ class Avaliador():
         return correspontencias
 
     def json(self, registros: list[dict]):
-        pass
+        erros = [erro 
+             for registro in registros
+             for erro in registro["erros"] 
+            ]
+        
+        json_erros = [erro for erro in erros if erro == "json"]
 
+        return len(json_erros)
+    
     def bloqueios(self):
         pass
 

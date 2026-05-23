@@ -40,42 +40,46 @@ def avaliacao():
         
         
         try:
-
-            chain = AssistantChain(teste.input)
-            avaliador = Avaliador()
-            input_guardrail = Input_Guardrail(teste.input)
             erros: set[str] = set()
-            erros.update(input_guardrail.validar_input())
-            
-            classificacao = chain.classificar()
-            print("classificacao", classificacao)
-            processamento: Optional[ProcessamentoSchema] = None
-            if isinstance(classificacao, ClassificacaoSchema):
-                resultado = chain.processar(classificacao)
+            def executar():
+                chain = AssistantChain(teste.input)
+                avaliador = Avaliador()
+                input_guardrail = Input_Guardrail(teste.input)
+                erros.update(input_guardrail.validar_input())
+                if len(erros) > 0:
+                    return
+                classificacao = chain.classificar()
+                print("classificacao", classificacao)
+                processamento: Optional[ProcessamentoSchema] = None
                 
-                if isinstance(resultado, ProcessamentoSchema):
-                    processamento = resultado
-                else:
-                    erros.update(resultado)
-                print("processamento", processamento)
-            
-            if len(erros) == 0 and classificacao and processamento:
-                resposta = chain.responder(classificacao, processamento)
+                if isinstance(classificacao, ClassificacaoSchema):
+                    resultado = chain.processar(classificacao)
+                    
+                    if isinstance(resultado, ProcessamentoSchema):
+                        processamento = resultado
+                    else:
+                        erros.update(resultado)
+                    print("processamento", processamento)
                 
-                if isinstance(resposta, RespostaSchema):
-                    registros.append(RegistroSchema(classificacao=classificacao, duracao=0,  processamento=processamento, resposta=resposta.response, esperado={
-                        "urgencia": teste.urgencia,
-                        "tipo": teste.tipo,
-                        
-                    }, palavras_esperadas=teste.palavras_chaves))
-                    print(resposta.response)
-                    print(avaliador.acuracia(resposta.response, teste.palavras_chaves))
-            else:
+                if len(erros) == 0 and classificacao and processamento:
+                    resposta = chain.responder(classificacao, processamento)
+                    
+                    if isinstance(resposta, RespostaSchema):
+                        registros.append(RegistroSchema(classificacao=classificacao, duracao=0,  processamento=processamento, resposta=resposta.response, esperado={
+                            "urgencia": teste.urgencia,
+                            "tipo": teste.tipo,
+                            
+                        }, palavras_esperadas=teste.palavras_chaves))
+                        print(resposta.response)
+                        print(avaliador.acuracia(resposta.response, teste.palavras_chaves))
+            executar()
+            if len(erros) > 0:
                 print("infelizmente sua solicitação foi recusada devido aos seguintes erros: ")
                 mensagens = {
                     "json": "problemas internos",
                     "tamanho": "prompt excedendo o limite máximo",
-                    "proibido": "caracteres"
+                    "proibido": "caracteres",
+                    "ignore instructions": "tentativa de comprometer o comportamento do sistema"
                 }        
                 for erro in erros:
                     print(mensagens[erro])
